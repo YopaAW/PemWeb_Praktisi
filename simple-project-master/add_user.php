@@ -25,34 +25,26 @@
         $md5_password = md5($password);
         $issued_date = date('Y-m-d');
 
+        if($gender == 'Laki-Laki'){
+            $generate_date = date('dmy', strtotime($birth_date));
+        }else{
+            $woman_date = date('d', strtotime($birth_date)) + 40;
+            $generate_date = $woman_date.date('my', strtotime($birth_date));
+        }
+
+        $citizen_id = $_POST['district'].$generate_date.'0001';
 
         if($password != $repassword){
             echo "<script>alert('Password dan Konfirmasi Password tidak sesuai!')</script>";
-        }else{if($gender == 'Laki-Laki'){
-                $generate_date = date('dmy', strtotime($birth_date));
-                $citizen_id = $_POST['district'].$generate_date.'0001';
-                $lastNikQuery = "SELECT MAX(SUBSTRING(citizen_id, -4)) AS last_nik FROM user WHERE birth_place = '$birth_place' AND birth_date = '$birth_date';";
-                $lastNikResult = mysqli_query($conn, $lastNikQuery);
-                $lastNikRow = mysqli_fetch_assoc($lastNikResult);
-                $lastNik = $lastNikRow['last_nik'];
+        }else{
+            $lastNikQuery = "SELECT MAX(SUBSTRING(citizen_id, -4)) AS last_nik FROM user WHERE birth_place = '$birth_place' AND birth_date = '$birth_date';";
+            $lastNikResult = mysqli_query($conn, $lastNikQuery);
+            $lastNikRow = mysqli_fetch_assoc($lastNikResult);
+            $lastNik = $lastNikRow['last_nik'];
 
-                $newNikNumber = ($lastNik != null) ? intval($lastNik) + 1 : 1;
-                $newNikNumberPadded = str_pad($newNikNumber, 4, '0', STR_PAD_LEFT);
-                $citizen_id = $_POST['district'] . $generate_date . $newNikNumberPadded;
-            }else{
-                $woman_date = date('d', strtotime($birth_date)) ;
-                $generate_date = $woman_date.date('my', strtotime($birth_date));
-                $citizen_id = $_POST['district'].$generate_date.'0041';
-            }
-
-                $lastNikQuery = "SELECT MAX(SUBSTRING(citizen_id, -4)) AS last_nik FROM user WHERE birth_place = '$birth_place' AND birth_date = '$birth_date';";
-                $lastNikResult = mysqli_query($conn, $lastNikQuery);
-                $lastNikRow = mysqli_fetch_assoc($lastNikResult);
-                $lastNik = $lastNikRow['last_nik'];
-
-                $newNikNumber = ($lastNik != null) ? intval($lastNik) + 1 : 1;
-                $newNikNumberPadded = str_pad($newNikNumber, 4, '0', STR_PAD_LEFT);
-                $citizen_id = $_POST['district'] . $generate_date . $newNikNumberPadded + 40;
+            $newNikNumber = ($lastNik != null) ? intval($lastNik) + 1 : 1;
+            $newNikNumberPadded = str_pad($newNikNumber, 4, '0', STR_PAD_LEFT);
+            $citizen_id = $_POST['district'] . $generate_date . $newNikNumberPadded;
 
             $query = "INSERT INTO `user`(`user_fullname`, `user_name`, `user_password`, `citizen_id`, `birth_place`, `birth_date`, `gender`, `blood_type`, `address`, `village_id`, `religion_id`, `marital_id`, `job_title`, `citizen_type`, `issued_date`) VALUES ('$fullname','$username','$md5_password','$citizen_id','$birth_place','$birth_date','$gender','$blood_type','$address','$village_id','$religion_id','$marital_id','$job_title','$citizen_type','$issued_date')";
             $result = mysqli_query($conn, $query);
